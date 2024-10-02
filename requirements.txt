@@ -1,0 +1,5 @@
+requests
+pyyaml
+Flask
+Flask-Testing
+Flask-Limiter
