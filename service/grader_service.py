@@ -33,11 +33,10 @@ def allowed_file(filename):
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 def validate_name(name):
-    return re.match(r'^[a-zA-Z0-9_\-\.]+$', name) is not None
+    return re.match(r'^[a-zA-Z0-9_\-\. ]+$', name) is not None
 
 def check_name_in_file(name, filename):
     with open(filename, 'r') as f:
-        logging.info(f"User: {name in [line.strip() for line in f]}")
         return name in [line.strip() for line in f]
 
 def get_next_submission_number(directory):
@@ -60,6 +59,7 @@ def submit_project():
     file = request.files['submission']
     student_name = request.form.get('student_name')
     course_name = request.form.get('course_name')
+    logging.info(f"{student_name}, {course_name}")
 
     if not all([file, student_name, course_name]):
         return jsonify({"error": "Missing required information"}), 400
