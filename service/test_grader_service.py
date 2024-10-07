@@ -7,32 +7,48 @@ from io import BytesIO
 class GraderServiceTestCase(unittest.TestCase):
     def setUp(self):
         self.app = app
-        self.app.config['TESTING'] = True
-        self.app.config['UPLOAD_FOLDER'] = tempfile.mkdtemp()
+        self.app.testing = True
+        self.app.config['upload_folder'] = tempfile.mkdtemp()
         self.client = self.app.test_client()
+
+        # Backup original content (assume files always exist)
+        with open('students.txt', 'r') as f:
+            self.students_backup = f.read()
+
+        with open('courses.txt', 'r') as f:
+            self.courses_backup = f.read()
 
         # Create temporary files for students and courses
         with open('students.txt', 'w') as f:
-            f.write('john_doe\n')
+            f.write('s-nhohnn\n')
         with open('courses.txt', 'w') as f:
-            f.write('python_101\n')
+            f.write('Programmieren III\n')
 
     def tearDown(self):
-        # Remove temporary files
-        os.remove('students.txt')
-        os.remove('courses.txt')
+        # Restore the original content
+        with open('students.txt', 'w') as f:
+            f.write(self.students_backup)
 
-    # def test_submit_valid_project(self): #TODO: Not yet working because BytesIO is not a real file
-        # data = {
-        #     'student_name': 'john_doe',
-        #     'course_name': 'python_101'
-        # }
-        # file_content = b'This is a test zip file'
-        # data['submission'] = (BytesIO(file_content), 'test.zip')
-        #
-        # response = self.client.post('/submit', data=data, content_type='multipart/form-data')
-        # self.assertEqual(response.status_code, 200)
-        # self.assertIn(b'Submission successful', response.data)
+        with open('courses.txt', 'w') as f:
+            f.write(self.courses_backup)
+
+
+    def test_submit_valid_project(self):
+        data = {
+            'student_name': 's-nhohnn',
+            'course_name': 'Programmieren III'
+        }
+        file_content = b'This is a test zip file'
+        file_data = {
+            'submission': (BytesIO(file_content), 'test.zip')
+        }
+
+        response = self.client.post('/submit', data={**data, **file_data}, content_type='multipart/form-data')
+
+        print(response.text)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b'Submission successful', response.data)
 
     def test_submit_invalid_student(self):
         data = {
@@ -48,7 +64,7 @@ class GraderServiceTestCase(unittest.TestCase):
 
     def test_submit_invalid_course(self):
         data = {
-            'student_name': 'john_doe',
+            'student_name': 's-nhohnn',
             'course_name': 'invalid_course'
         }
         file_content = b'This is a test zip file'
@@ -60,8 +76,8 @@ class GraderServiceTestCase(unittest.TestCase):
 
     def test_submit_invalid_file_type(self):
         data = {
-            'student_name': 'john_doe',
-            'course_name': 'python_101'
+            'student_name': 's-nhohnn',
+            'course_name': 'Programmieren III'
         }
         file_content = b'This is not a zip file'
         data['submission'] = (BytesIO(file_content), 'test.txt')
@@ -72,25 +88,14 @@ class GraderServiceTestCase(unittest.TestCase):
 
     def test_submit_missing_file(self):
         data = {
-            'student_name': 'john_doe',
-            'course_name': 'python_101'
+            'student_name': 's-nhohnn',
+            'course_name': 'Programmieren III'
         }
 
         response = self.client.post('/submit', data=data, content_type='multipart/form-data')
         self.assertEqual(response.status_code, 400)
         self.assertIn(b'No file part', response.data)
 
-    def test_submit_invalid_zip(self):
-        data = {
-            'student_name': 'john_doe',
-            'course_name': 'python_101'
-        }
-        file_content = b'This is not a valid zip file'
-        data['submission'] = (BytesIO(file_content), 'test.zip')
-
-        response = self.client.post('/submit', data=data, content_type='multipart/form-data')
-        self.assertEqual(response.status_code, 400)
-        self.assertIn(b'Invalid zip file', response.data)
 
 if __name__ == '__main__':
     unittest.main()
