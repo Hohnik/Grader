@@ -1,5 +1,5 @@
 requests
 pyyaml
-Flask
-Flask-Testing
-Flask-Limiter
+docker
+sqlite3
+fastapi
