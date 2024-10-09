@@ -1,28 +1,23 @@
-import re
 import os
-import zipfile
 
-ALLOWED_EXTENSIONS = {'zip'}
+from db.utils import next_id
 
-def allowed_file(filename):
-    return '.' in filename and \
-           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-def validate_name(name):
-    return re.match(r'^[a-zA-Z0-9_\-\. ]+$', name) is not None
+def course_ok(course):
+    with open("db/courses.txt", "r") as f:
+        return course in [line.strip() for line in f]
 
-def check_name_in_file(name, filename):
-    with open(filename, 'r') as f:
+
+def student_ok(name):
+    with open("db/students.txt", "r") as f:
         return name in [line.strip() for line in f]
 
-def get_next_submission_number(directory):
-    existing_files = [f for f in os.listdir(directory) if f.endswith('.zip')]
-    return len(existing_files) + 1
 
-def is_valid_zip(file_path):
-    try:
-        with zipfile.ZipFile(file_path) as zf:
-            return True
-    except zipfile.BadZipFile:
-        return False
+def save_submission(student, course, zipfile) -> int:
+    task_id = next_id()
 
+    os.makedirs(f"submissions/{course}/{student}", exist_ok=True)
+    with open(f"submissions/{course}/{student}/{task_id}.zip", "wb") as f:
+        f.write(zipfile.file.read())
+
+    return task_id
