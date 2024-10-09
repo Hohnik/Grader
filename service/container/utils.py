@@ -1,45 +1,49 @@
 import asyncio
 import time
+from collections.abc import Container
 
 import docker
 
-docker_client = docker.from_env()
+client = docker.from_env()
 
 
 termination_tasks = {}
 
-course_container_mapping = {"Programmieren III": "programmieren3.dockerfile"}
+course_container_mapping = {"Programmieren III": "programmieren3"}
 
 
-async def spawn_container(id: int, course: str, file_url: str):
+async def spawn_container(id: int, student_name: str, course_name: str) -> str:
 
-    dockerfile = course_container_mapping[course]
+    sub_file_url: str = f"submissions/{course_name}/{student_name}/{id}.zip"
+    image_name = dockerfile = course_container_mapping[course_name]
+    container_name = f"{image_name}_{student_name}_{id}"
 
-    # TODO: Create a new container with the given id
+    with open(f"container/dockerfiles/{dockerfile}", "rb") as dockerfile:
+        _, build_logs = client.images.build(
+            fileobj=dockerfile, tag=f"{image_name}", rm=True
+        )
 
-    # container = docker_client.containers.run(
-    #     image=container_req.image,
-    #     command="echo Test",
-    #     remove=True,
-    # )
+    # NOTE: Remove in prod, just for debugging
+    for line in build_logs:
+        print(line)
 
-    timeout = time.time() + 5 * 60
-    termination_tasks[id] = asyncio.create_task(terminate_container(id, timeout))
+    container = client.containers.run(
+        image=image_name, name=container_name, detach=True
+    )
 
-    return {
-        "status": "success",
-        "container_id": id,
-        "termination_scheduled": time.time() + 5 * 60,
-    }
+    timeout = time.time() + 5 * 60  # NOTE: fetch this from lecturer configs
+    termination_tasks[container.id] = asyncio.create_task(
+        terminate_container(container, timeout)
+    )
+
+    return "8/10"
 
 
-async def terminate_container(container_id, timeout_seconds):
-    await asyncio.sleep(timeout_seconds)
+async def terminate_container(container, timeout):
+    await asyncio.sleep(timeout)
     try:
-        container = docker_client.containers.get(container_id)
         container.kill()
         container.remove()
 
     finally:
-        del termination_tasks[container_id]
-    return 10
+        del termination_tasks[container.id]

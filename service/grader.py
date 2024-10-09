@@ -4,7 +4,7 @@ import zipfile
 from fastapi import FastAPI, File, Form, HTTPException, Request, UploadFile
 from fastapi.responses import JSONResponse
 
-# from container.utils import spawn_container
+from container.utils import spawn_container
 from utils import course_ok, save_submission, student_ok
 
 app = FastAPI()
@@ -29,27 +29,24 @@ async def submit(
     student_name: str = Form(),
     course_name: str = Form(),
 ):
-    logging.info("Entered server")
-    if not course_ok(course_name):  # not empty, characters, in db
+    if not course_ok(course_name):
         raise HTTPException(
             status_code=400, detail="Course not found. Check for spelling errors!"
         )
 
-    if not student_ok(student_name):  # not empty, characters, in db
+    if not student_ok(student_name):
         raise HTTPException(status_code=401, detail="Unauthorized user")
 
     if not zipfile.is_zipfile(submission.file):
         raise HTTPException(
             status_code=415, detail="Filetype not allowed. Only '*.zip' files"
         )
-    logging.info("Got checks correct")
 
     sub_id: int = save_submission(student_name, course_name, submission)
     logging.info(f"{sub_id}:{course_name}/{student_name} - submission saved")
 
-    file_url: str = f"submissions/{course_name}/{student_name}/{sub_id}.zip"
-    score = "7/10"
-    # score: str = spawn_container(sub_id, course_name, file_url)
+    score: str = await spawn_container(sub_id, student_name, course_name)
+
     with open(f"submissions/{course_name}/{student_name}/score.txt", "a") as f:
         f.write(score)
     logging.info(f"{sub_id}:{course_name}/{student_name} - score:{score}")
@@ -58,6 +55,7 @@ async def submit(
         {
             "message": f"Submission with ID {id} successful",
             "submission_number": sub_id,
+            "score": score,
         },
         status_code=200,
     )
