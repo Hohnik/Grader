@@ -1,42 +1,35 @@
 import asyncio
+import logging
 import time
-from collections.abc import Container
 
 import docker
-
-client = docker.from_env()
-
+from docker.models.containers import Container
 
 termination_tasks = {}
 
-course_container_mapping = {"Programmieren III": "programmieren3"}
 
+async def spawn_container(id: int, directory: str) -> str:
+    """
+    Spawns a container from the given directory and returns the path to the score.txt file
+    """
+    logging.info(f"Spawning container for student {id} from directory {directory}")
+    client = docker.from_env(timeout=5 * 60)
 
-async def spawn_container(id: int, student_name: str, course_name: str) -> str:
+    image, build_logs = client.images.build(path=directory, rm=True)
+    container = client.containers.run(image=image, name=f"student_{id}", detach=True)
 
-    sub_file_url: str = f"submissions/{course_name}/{student_name}/{id}.zip"
-    image_name = dockerfile = course_container_mapping[course_name]
-    container_name = f"{image_name}_{student_name}_{id}"
+    termination_tasks[container.id] = asyncio.create_task(
+        terminate_container(container, time.time() + 1 * 60)
+    )
 
-    with open(f"container/dockerfiles/{dockerfile}", "rb") as dockerfile:
-        _, build_logs = client.images.build(
-            fileobj=dockerfile, tag=f"{image_name}", rm=True
-        )
+    file_content = await await_score(container)
+    with open(f"{directory}/score.txt", "wb") as f:
+        f.write(file_content)
 
-    # NOTE: Remove in prod, just for debugging
     for line in build_logs:
         print(line)
 
-    container = client.containers.run(
-        image=image_name, name=container_name, detach=True
-    )
-
-    timeout = time.time() + 5 * 60  # NOTE: fetch this from lecturer configs
-    termination_tasks[container.id] = asyncio.create_task(
-        terminate_container(container, timeout)
-    )
-
-    return "8/10"
+    return f"{directory}/score.txt"
 
 
 async def terminate_container(container, timeout):
@@ -47,3 +40,19 @@ async def terminate_container(container, timeout):
 
     finally:
         del termination_tasks[container.id]
+
+
+async def await_score(container: Container):
+    while container.status == "running":
+        await asyncio.sleep(5)
+        container.reload()
+    print(f"Container '{container.id}' is no longer running. Terminating...")
+
+    bits, stat = container.get_archive("/app/score.txt")
+    file_content = b"".join(bits)
+
+    print("Stats:", stat)
+
+    container.remove(force=True)
+
+    return file_content
