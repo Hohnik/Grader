@@ -113,7 +113,7 @@ async def spawn_container(id: int, directory: str) -> str:
         if container.status != "running":
             raise RuntimeError(f"Container failed to start. Status: {container.status}")
             
-        logging.info(f"Container started successfully - ID: {container.id}, Task: {id}")
+        logging.info(f"Container started successfully - ID: {container.id[:12]}, Task: {id}")
         
         # Set 5 minute timeout for container execution
         termination_tasks[container.id] = asyncio.create_task(
@@ -150,7 +150,7 @@ async def terminate_container(container, timeout):
     try:
         container.kill()
         container.remove()
-        logging.info(f"Container terminated - ID: {container.id}")
+        logging.info(f"Container terminated - ID: {container.id[:12]}")
 
     finally:
         del termination_tasks[container.id]
@@ -231,7 +231,7 @@ async def await_score(container: Container):
     while container.status == "running":
         await asyncio.sleep(5)
         container.reload()
-    logging.info(f"Container stopped running - ID: {container.id}")
+    logging.info(f"Container stopped running - ID: {container.id[:12]}")
 
     # Get pytest output from container logs
     logs = container.logs().decode('utf-8')
