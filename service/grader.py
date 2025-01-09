@@ -6,9 +6,8 @@ import zipfile
 from fastapi import FastAPI, File, Form, HTTPException, Request, UploadFile
 from fastapi.responses import JSONResponse
 
-from container.utils import spawn_container, cleanup_student_directory
+from utils import spawn_container, cleanup_student_directory, course_ok, student_ok
 from db.utils import next_id
-from utils import course_ok, student_ok
 
 app = FastAPI()
 # Configure logging with a consistent format
