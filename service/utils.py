@@ -239,7 +239,7 @@ async def await_score(container: Container):
     score = calculate_score(passed_tests, total_tests)
     
     # Create score file with detailed information
-    score_content = f"""Score: {score}/100
+    score_content = f"""{score}/100
 Passed Tests: {passed_tests}
 Total Tests: {total_tests}
 
