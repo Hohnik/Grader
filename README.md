@@ -1,6 +1,6 @@
 # Automated Python Grading System
 
-A containerized grading system for Python assignments that provides automated testing and scoring. The system supports weighted tests and maintains a history of student submissions.
+A containerized grading system for Python(for now) assignments that provides automated testing and scoring. The system supports weighted tests and maintains a history of student submissions.
 
 ## For Server Administrators
 
