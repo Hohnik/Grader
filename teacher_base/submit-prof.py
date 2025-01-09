@@ -16,13 +16,13 @@ def submit_project(config):
     url = "http://0.0.0.0:8000/upload"  # TODO: Relace with real url
 
     files = {
-        "tests": open(tests, "rb"), 
-        "dockerfile": open("Dockerfile", "rb")
+        "tests": open(tests, "rb"),
+        "dockerfile": open("Dockerfile", "rb"),
+        "requirements": open("requirements.txt", "rb"),
     }
     data = {
         "username": config["username"],
         "password": config["password"],
-
         "course_name": config["course_name"],
         "start_date": config["start_date"],
         "end_date": config["end_date"],
