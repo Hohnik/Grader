@@ -1,13 +1,13 @@
 import sqlite3
 
-conn = sqlite3.connect("db/id.db")
+conn = sqlite3.connect("db/grader.db")
 cursor = conn.cursor()
 
 
 def next_id():
     cursor.execute("BEGIN TRANSACTION;")
     try:
-        cursor.execute("SELECT id FROM global_id;")
+        cursor.execute("SELECT id FROM submissions;")
         current_id = cursor.fetchone()[0]
         new_id = current_id + 1
 

@@ -6,17 +6,10 @@ import zipfile
 from fastapi import FastAPI, File, Form, HTTPException, Request, UploadFile
 from fastapi.responses import JSONResponse
 
-from utils import spawn_container, cleanup_student_directory, course_ok, student_ok
-from db.utils import next_id
+from db.db_utils import next_id
+from utils import cleanup_student_directory, course_ok, spawn_container, student_ok
 
 app = FastAPI()
-# Configure logging with a consistent format
-logging.basicConfig(
-    filename="grader.log",
-    level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s',
-    datefmt='%Y-%m-%d %H:%M:%S'
-)
 
 
 @app.middleware("http")
@@ -38,7 +31,9 @@ async def submit(
     student_name: str = Form(),
     course_name: str = Form(),
 ):
-    logging.info(f"Student submission received - Course: {course_name}, Student: {student_name}")
+    logging.info(
+        f"Student submission received - Course: {course_name}, Student: {student_name}"
+    )
 
     # if not course_ok(course_name):
     #     raise HTTPException(
@@ -59,7 +54,9 @@ async def submit(
 
     course_dir = f"courses/{course_name}"
     student_base_dir = f"submissions/{course_name}/{student_name}"
-    submission_dir = f"{student_base_dir}/{task_id}"  # Create specific directory for this submission
+    submission_dir = (
+        f"{student_base_dir}/{task_id}"  # Create specific directory for this submission
+    )
 
     # Create directories
     os.makedirs(student_base_dir, exist_ok=True)
@@ -82,32 +79,38 @@ async def submit(
 
     # Create src directory
     os.makedirs(f"{submission_dir}/src", exist_ok=True)
-    
+
     # Extract submission to src directory
     with zipfile.ZipFile(zip_url, "r") as zip_ref:
         # List all files in the zip
         file_list = zip_ref.namelist()
-        
+
         for file_name in file_list:
             # Skip directories and hidden files
-            if file_name.endswith('/') or file_name.startswith('__') or file_name.startswith('.'):
+            if (
+                file_name.endswith("/")
+                or file_name.startswith("__")
+                or file_name.startswith(".")
+            ):
                 continue
-                
+
             # Extract the file to src directory
             zip_info = zip_ref.getinfo(file_name)
-            zip_info.filename = os.path.basename(file_name)  # Remove any path components
+            zip_info.filename = os.path.basename(
+                file_name
+            )  # Remove any path components
             zip_ref.extract(zip_info, f"{submission_dir}/src")
-    
+
     logging.debug(f"Extracted submission files to src directory")
 
     score_url = await spawn_container(task_id, submission_dir)
     score = None
     with open(score_url, "r") as f:
         score = f.read()
-    
+
     # Clean up all temporary files after grading
     cleanup_student_directory(submission_dir)
-    
+
     logging.info(f"Grading completed - Task: {task_id}, Score: {score}")
     logging.info("")  # Add blank line after submission
 
@@ -132,7 +135,9 @@ async def teacher_upload(
     dockerfile: UploadFile = File(None),
     requirements: UploadFile = File(None),
 ):
-    logging.info(f"Teacher upload received - Course: {course_name}, Teacher: {username}")
+    logging.info(
+        f"Teacher upload received - Course: {course_name}, Teacher: {username}"
+    )
     logging.debug(f"Course details - Start: {start_date}, End: {end_date}")
 
     course_dir = f"courses/{course_name}"
@@ -145,6 +150,6 @@ async def teacher_upload(
         f.write(dockerfile.file.read())
     with open(f"{course_dir}/requirements.txt", "wb") as f:
         f.write(requirements.file.read())
-    
+
     logging.info(f"Course files uploaded successfully - Course: {course_name}")
     logging.info("")  # Add blank line after upload
