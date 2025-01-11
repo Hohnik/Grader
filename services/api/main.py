@@ -5,6 +5,15 @@ from fastapi import FastAPI, HTTPException, Request
 from api.db_handler import initialize_db
 from api.routes import student_router, teacher_router
 
+logging.basicConfig(
+    level=logging.INFO,
+    filename="grader.log",
+    filemode="a",
+    format="%(asctime)s - %(levelname)s - %(message)s",
+    datefmt="%H:%M:%S",
+)
+
+
 app = FastAPI()
 app.include_router(student_router)
 app.include_router(teacher_router)

@@ -1,5 +1,5 @@
 -- Create the `assignments` table
-CREATE TABLE IF NOT EXISTS assignments (
+CREATE TABLE IF NOT EXISTS submissions (
     id INTEGER PRIMARY KEY AUTOINCREMENT
 );
 

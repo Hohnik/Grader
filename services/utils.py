@@ -38,13 +38,7 @@ def cleanup_student_directory(directory: str):
         if os.path.exists(f"{directory}/tests"):
             shutil.rmtree(f"{directory}/tests")
 
-        # Remove any zip files in the directory
-        for file in os.listdir(directory):
-            if file.endswith(".zip"):
-                os.remove(os.path.join(directory, file))
-                logging.debug(f"Removed zip file: {file}")
-
-        logging.debug(f"Cleaned up directory: {directory}")
+        logging.info(f"Cleaned up directory: {directory}")
     except Exception as e:
         logging.error(f"Error during cleanup - Directory: {directory}, Error: {str(e)}")
 
