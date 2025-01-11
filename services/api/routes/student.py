@@ -43,10 +43,10 @@ async def submit(
     submission_dir = (
         f"{settings.paths.submissions_dir}/{course_name}/{student_name}/{sub_id}"
     )
-    os.makedirs(submission_dir, exist_ok=True)
+    os.makedirs(f"{submission_dir}/src", exist_ok=True)
     logging.info(f"Created submission directory: {submission_dir}")
     with ZipFile(BytesIO(submission.file.read())) as zip_ref:
-        zip_ref.extractall(submission_dir)
+        zip_ref.extractall(submission_dir + "/src")
     logging.info(f"Unziped src/")
 
     # Copy course files to submission directory
