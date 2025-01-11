@@ -1,9 +1,9 @@
 # Student Configuration
 # ==================
 # Please change YOUR_NAME_HERE to your actual name
-student_name: YOUR_NAME_HERE
+student_name: s-nhohnn
 
 # Course Configuration (pre-filled by professor)
 # ============================================
-course_name: python-intro-2024
+course_name: Programmieren
 server_url: http://localhost:8000 

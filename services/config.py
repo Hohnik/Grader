@@ -1,11 +1,14 @@
 from pathlib import Path
 from typing import Optional
-from pydantic_settings import BaseSettings
+
 from pydantic import Field, field_validator
+from pydantic_settings import BaseSettings
+
 
 class DatabaseSettings(BaseSettings):
     url: str = "sqlite:///grader.db"
     echo: bool = False  # SQL query logging
+
 
 class DockerSettings(BaseSettings):
     timeout: int = 300  # 5 minutes
@@ -13,11 +16,12 @@ class DockerSettings(BaseSettings):
     cpu_quota: int = 50000  # 50% of one CPU
     cpu_period: int = 100000
 
+
 class PathSettings(BaseSettings):
     base_dir: Path = Field(default=Path(__file__).parent.parent)
-    submissions_dir: Path = Field(default=None)
-    courses_dir: Path = Field(default=None)
-    logs_dir: Path = Field(default=None)
+    submissions_dir: Path = Path("_submissions")
+    courses_dir: Path = Path("_courses")
+    logs_dir: Path = Path("_logs")
 
     @field_validator("submissions_dir", "courses_dir", "logs_dir", mode="before")
     @classmethod
@@ -34,17 +38,18 @@ class PathSettings(BaseSettings):
         self.courses_dir.mkdir(parents=True, exist_ok=True)
         self.logs_dir.mkdir(parents=True, exist_ok=True)
 
+
 class Settings(BaseSettings):
     # Service configuration
     env: str = "development"
     debug: bool = True
     api_host: str = "0.0.0.0"
     api_port: int = 8000
-    
+
     # File limits
     max_upload_size: int = 50 * 1024 * 1024  # 50MB
     allowed_extensions: set[str] = {".zip", ".py"}
-    
+
     # Sub-configurations
     db: DatabaseSettings = DatabaseSettings()
     docker: DockerSettings = DockerSettings()
@@ -53,7 +58,7 @@ class Settings(BaseSettings):
     model_config = {
         "env_file": ".env",
         "env_prefix": "GRADER_",
-        "env_nested_delimiter": "__"
+        "env_nested_delimiter": "__",
     }
 
     def setup(self, create_dirs: bool = True):
@@ -62,5 +67,7 @@ class Settings(BaseSettings):
             self.paths.ensure_dirs()
         return self
 
+
 # Create global settings instance but don't create directories yet
-settings = Settings().setup(create_dirs=False) 
+settings = Settings().setup(create_dirs=False)
+

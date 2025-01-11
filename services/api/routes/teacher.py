@@ -14,7 +14,7 @@ class upload(BaseModel):
 router = APIRouter()
 
 
-@router.post("/teacher/upload")
+@router.post("/teacher/upload/")
 async def teacher_upload(
     username: str = Form(None),
     password: str = Form(None),
