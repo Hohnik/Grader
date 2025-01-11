@@ -13,7 +13,7 @@ def main():
 def submit_project(config):
     tests = shutil.make_archive("tests", "zip", "tests")
 
-    url = "http://0.0.0.0:8000/upload"  # TODO: Relace with real url
+    url = "http://0.0.0.0:8000/teacher/upload/"  # TODO: Relace with real url
 
     files = {
         "tests": open(tests, "rb"),
