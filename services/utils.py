@@ -8,9 +8,8 @@ import tarfile
 import time
 
 import docker
+import docker.errors
 from docker.models.containers import Container
-
-from db.db_utils import next_id
 
 # Container-related tasks dictionary
 termination_tasks = {}
@@ -108,9 +107,7 @@ async def spawn_container(id: int, directory: str) -> str:
         if container.status != "running":
             raise RuntimeError(f"Container failed to start. Status: {container.status}")
 
-        logging.info(
-            f"Container started successfully - ID: {container.id[:12]}, Task: {id}"
-        )
+        logging.info(f"Container started successfully - ID: {container.id}, Task: {id}")
 
         # Set 5 minute timeout for container execution
         termination_tasks[container.id] = asyncio.create_task(
@@ -137,7 +134,7 @@ async def spawn_container(id: int, directory: str) -> str:
         # Clean up container if it exists
         try:
             container.remove(force=True)
-        except:
+        except docker.errors.NotFound:
             pass
         raise
 
@@ -228,7 +225,7 @@ async def await_score(container: Container):
     while container.status == "running":
         await asyncio.sleep(5)
         container.reload()
-    logging.info(f"Container stopped running - ID: {container.id[:12]}")
+    logging.info(f"Container stopped running - ID: {container.id}")
 
     # Get pytest output from container logs
     logs = container.logs().decode("utf-8")
