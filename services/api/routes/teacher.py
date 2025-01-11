@@ -5,6 +5,8 @@ import zipfile
 from fastapi import APIRouter, File, Form, UploadFile
 from pydantic import BaseModel
 
+from config import settings
+
 
 class upload(BaseModel):
     username: str
@@ -30,7 +32,7 @@ async def teacher_upload(
     )
     logging.debug(f"Course details - Start: {start_date}, End: {end_date}")
 
-    course_dir = f"courses/{course_name}"
+    course_dir = f"{settings.paths.courses_dir}/{course_name}"
 
     unzipped = zipfile.ZipFile(tests.file, "r")
     os.makedirs(f"{course_dir}/tests", exist_ok=True)
@@ -42,4 +44,4 @@ async def teacher_upload(
         f.write(requirements.file.read())
 
     logging.info(f"Course files uploaded successfully - Course: {course_name}")
-    logging.info("")  # Add blank line after upload
+    logging.info("")
