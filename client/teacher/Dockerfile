@@ -11,10 +11,8 @@ COPY src/ ./src/
 COPY tests/ ./tests/
 
 RUN touch src/__init__.py tests/__init__.py
-RUN touch score.txt
-RUN echo "17/100" > score.txt
 
 ENV PYTHONPATH=/app
 ENV PYTEST_TIMEOUT=30
 
-CMD ["sh", "-c", "python -m pytest tests/ -v --no-header -rA --timeout=30 > score.txt"]
+CMD ["sh", "-c", "python -m pytest tests/ -v --no-header -rA --timeout=30"]

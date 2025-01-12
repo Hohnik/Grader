@@ -1,10 +1,12 @@
 import asyncio
+import io
 import logging
+import tarfile
 import time
 
 import docker
 import docker.errors
-from docker.models.containers import Container
+from docker.models.containers import Container, ExecResult
 
 termination_tasks = {}
 
@@ -62,7 +64,7 @@ async def terminate_container(container, timeout):
         del termination_tasks[container.id]
 
 
-async def score(container: Container):
+async def score(container: Container) -> str:
     while container.status == "running":
         await asyncio.sleep(5)
         container.reload()
@@ -70,9 +72,11 @@ async def score(container: Container):
         f"Container {container.id[:12] if container.id else container.id} finished."
     )
 
-    bits, _ = container.get_archive("/app/score.txt")
-    file_content = b"".join(bits)
+    status_code, output = container.exec_run(
+        "python -m pytest tests/ -v --no-header -rA --timeout=30"
+    )
+    if status_code != 0:
+        logging.error(f"Container failed to execute tests - Output: {output}")
 
     container.remove(force=True)
-
-    return str(file_content)
+    return output.decode()
