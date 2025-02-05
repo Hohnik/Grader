@@ -4,11 +4,12 @@ import shutil
 from pathlib import Path
 import yaml
 
+
 def create_student_package(
     course_name: str,
     server_url: str,
     template_dir: str,
-    output_dir: str = "student_package"
+    output_dir: str = "student_package",
 ):
     """
     Create a package for students containing:
@@ -47,9 +48,9 @@ def create_student_package(
     config = {
         "student_name": "YOUR_NAME_HERE",
         "course_name": course_name,
-        "server_url": server_url
+        "server_url": server_url,
     }
-    
+
     with open(output_path / "config.yaml", "w") as f:
         yaml.safe_dump(config, f, default_flow_style=False)
 
@@ -58,18 +59,23 @@ def create_student_package(
     for item in output_path.iterdir():
         print(f"- {item.name}")
 
+
 def main():
     print("📦 Student Package Preparation Tool")
     print("==================================")
-    
+
     # Get course details from professor
     course_name = input("Enter course name (e.g., python-intro-2024): ").strip()
-    server_url = input("Enter grading server URL (default: http://localhost:8000): ").strip()
+    server_url = input(
+        "Enter grading server URL (default: http://localhost:8000): "
+    ).strip()
     if not server_url:
         server_url = "http://localhost:8000"
-    
+
     template_dir = input("Enter path to template files: ").strip()
-    output_dir = input("Enter output directory name (default: student_package): ").strip()
+    output_dir = input(
+        "Enter output directory name (default: student_package): "
+    ).strip()
     if not output_dir:
         output_dir = "student_package"
 
@@ -80,5 +86,6 @@ def main():
     except Exception as e:
         print(f"\n❌ Error creating package: {e}")
 
+
 if __name__ == "__main__":
-    main() 
+    main()

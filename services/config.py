@@ -70,4 +70,3 @@ class Settings(BaseSettings):
 
 # Create global settings instance but don't create directories yet
 settings = Settings().setup(create_dirs=False)
-
