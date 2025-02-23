@@ -9,5 +9,6 @@ def initialize_db():
 def submission_id():
     return create_submission()
 
+
 def get_container_url(course_name):
     return fetch_container(course_name)

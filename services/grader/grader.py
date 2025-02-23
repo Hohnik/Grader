@@ -7,7 +7,7 @@ async def spawn_container(sub_dir: str, container_url: str) -> str:
     """
     Runs the prebuilt Docker container (from Docker Hub) using the provided submission
     and returns the absolute filepath of the output score.txt file.
-    
+
     This function assumes that:
      - student code will be mounted to sub_dir/src/
      - the Docker container writes the score output to sub_dir/output/score.txt.
@@ -21,17 +21,14 @@ async def spawn_container(sub_dir: str, container_url: str) -> str:
     # Construct Docker run command with absolute paths.
     # Note: Use quotes to properly escape any spaces in the path.
     cmd = (
-        'docker run --rm '
+        "docker run --rm "
         f'-v "{src_path}:/app/src/" '
         f'-v "{output_path}:/app/output/" '
-        'hohniki/teacher_test:latest' # f'{container_url}'
+        "hohniki/teacher_test:latest"  # f'{container_url}'
     )
 
-
     command = await asyncio.create_subprocess_shell(
-        cmd,
-        stdout=asyncio.subprocess.PIPE,
-        stderr=asyncio.subprocess.PIPE
+        cmd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
     )
     stdout, stderr = await command.communicate()
 

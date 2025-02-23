@@ -40,7 +40,6 @@ async def submit(
     with open(score_url, "r") as file:
         score = file.read()
 
-
     logging.info(f"Grading completed for ID: {id}, Score: {score}")
     return JSONResponse(
         {
@@ -48,6 +47,7 @@ async def submit(
         },
         status_code=200,
     )
+
 
 def create_submission_dir(id, submission, student, course):
     """
@@ -59,7 +59,7 @@ def create_submission_dir(id, submission, student, course):
                     src/
                         main.py
     """
-    sub_dir = (f"{settings.paths.submissions_dir}/{course}/{student}/id{id}")
+    sub_dir = f"{settings.paths.submissions_dir}/{course}/{student}/id{id}"
     base_path = Path(sub_dir).resolve()
     src_path = base_path / "src"
     output_path = base_path / "output"
