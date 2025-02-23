@@ -25,24 +25,6 @@ def student_ok(name):
         return name in [line.strip() for line in f]
 
 
-def cleanup_student_directory(directory: str):
-    """
-    Cleans up the student directory, keeping only the source code and score file
-    """
-    try:
-        # Remove Dockerfile, requirements.txt, and tests directory
-        if os.path.exists(f"{directory}/Dockerfile"):
-            os.remove(f"{directory}/Dockerfile")
-        if os.path.exists(f"{directory}/requirements.txt"):
-            os.remove(f"{directory}/requirements.txt")
-        if os.path.exists(f"{directory}/tests"):
-            shutil.rmtree(f"{directory}/tests")
-
-        logging.info(f"Cleaned up directory: {directory}")
-    except Exception as e:
-        logging.error(f"Error during cleanup - Directory: {directory}, Error: {str(e)}")
-
-
 async def spawn_container(id: int, directory: str) -> str:
     """
     Spawns a container from the given directory and returns the path to the score.txt file

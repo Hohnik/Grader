@@ -5,5 +5,5 @@ student_name: s-nhohnn
 
 # Course Configuration (pre-filled by professor)
 # ============================================
-course_name: Programmieren
+course_name: example_course
 server_url: http://localhost:8000 

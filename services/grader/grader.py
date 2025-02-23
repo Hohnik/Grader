@@ -1,82 +1,63 @@
 import asyncio
-import io
 import logging
-import tarfile
-import time
-
-import docker
-import docker.errors
-from docker.models.containers import Container, ExecResult
-
-termination_tasks = {}
+from pathlib import Path
 
 
-async def spawn_container(directory: str) -> str:
+async def spawn_container(sub_dir: str, container_url: str) -> str:
     """
-    Spawns a container from the given directory and returns the score.
+    Runs the prebuilt Docker container (from Docker Hub) using the provided submission
+    and returns the absolute filepath of the output score.txt file.
+    
+    This function assumes that:
+     - student code will be mounted to sub_dir/src/
+     - the Docker container writes the score output to sub_dir/output/score.txt.
     """
-    logging.info(f"Starting container spawn")
-    try:
-        client = docker.DockerClient(
-            base_url="unix://var/run/docker.sock", version="auto"
-        )
+    logging.info("Spawning Docker container with prebuilt image.")
 
-        try:
-            logging.debug(f"Building Docker image")
-            image = client.images.build(
-                path=directory, rm=True, forcerm=True, pull=False
-            )[0]
-        except docker.errors.BuildError as e:
-            logging.error(f"Failed to build Docker image - Error: {str(e)}")
-            raise
-        logging.debug(f"Docker image built successfully")
+    base_path = Path(sub_dir).resolve()
+    src_path = base_path / "src"
+    output_path = base_path / "output"
 
-        assert image.id
-        container = client.containers.run(
-            image=image.id,
-            name=f"submission_{directory.split('/')[-1]}",
-            detach=True,
-            mem_limit="512m",  # Limit memory to prevent DOS
-            cpu_period=100000,
-            cpu_quota=50000,  # Limit CPU to 50% of one core
-        )
-        assert container.id
-        logging.info(f"Container started successfully - ID: {container.id[:12]}")
-
-        termination_tasks[container.id] = asyncio.create_task(
-            terminate_container(container, time.time() + 5 * 60)
-        )
-
-        return await score(container)
-
-    except Exception as e:
-        logging.error(f"Container execution failed - Error: {str(e)}")
-        raise
-
-
-async def terminate_container(container, timeout):
-    await asyncio.sleep(timeout)
-    try:
-        container.kill()
-        container.remove()
-
-    finally:
-        del termination_tasks[container.id]
-
-
-async def score(container: Container) -> str:
-    while container.status == "running":
-        await asyncio.sleep(5)
-        container.reload()
-    logging.info(
-        f"Container {container.id[:12] if container.id else container.id} finished."
+    # Construct Docker run command with absolute paths.
+    # Note: Use quotes to properly escape any spaces in the path.
+    cmd = (
+        'docker run --rm '
+        f'-v "{src_path}:/app/src/" '
+        f'-v "{output_path}:/app/output/" '
+        'hohniki/teacher_test:latest' # f'{container_url}'
     )
 
-    status_code, output = container.exec_run(
-        "python -m pytest tests/ -v --no-header -rA --timeout=30"
-    )
-    if status_code != 0:
-        logging.error(f"Container failed to execute tests - Output: {output}")
 
-    container.remove(force=True)
-    return output.decode()
+    command = await asyncio.create_subprocess_shell(
+        cmd,
+        stdout=asyncio.subprocess.PIPE,
+        stderr=asyncio.subprocess.PIPE
+    )
+    stdout, stderr = await command.communicate()
+
+    if command.returncode != 0:
+        error_msg = stderr.decode().strip() or stdout.decode().strip()
+        logging.error(f"Container execution failed: {error_msg}")
+        raise RuntimeError(f"Error running docker container: {error_msg}")
+    else:
+        logging.info("Container executed successfully.")
+
+    # The container should have written to output/score.txt.
+    score_file_path = output_path / "score.txt"
+
+    if not score_file_path.exists():
+        logging.error(f"Expected output file {score_file_path} not found.")
+        raise FileNotFoundError(f"Output file {score_file_path} not found.")
+
+    logging.info(f"Returning score file path: {score_file_path}")
+    return str(score_file_path)
+
+
+if __name__ == "__main__":
+    # set logging level to DEBUG to see all messages
+    logging.basicConfig(level=logging.DEBUG)
+    sub_dir = "./example_submission"
+    container_url = "hohniki/teacher_test:latest"
+
+    score_file = asyncio.run(spawn_container(sub_dir, container_url))
+    print(f"Score file available at: {score_file}")

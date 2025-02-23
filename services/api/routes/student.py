@@ -1,17 +1,15 @@
 import logging
-import os
-import shutil
 from io import BytesIO
+from pathlib import Path
 from zipfile import ZipFile
 
 from fastapi import APIRouter, File, Form, UploadFile
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 
-from api.db_handler import submission_id
+from api.db_handler import get_container_url, submission_id
 from api.grader_handler import grade_submission
 from config import settings
-from utils import cleanup_student_directory
 
 
 class submission(BaseModel):
@@ -33,39 +31,44 @@ async def submit(
         f"Submission received - Course: {course_name}, Student: {student_name}"
     )
 
-    # Get submission ID
-    sub_id = submission_id()
-    assert sub_id is not None
-    logging.info(f"Submission ID: {sub_id}")
+    # TODO: validate if course exists (also student_name?)
 
-    # Create submission directory
-    course_dir = f"{settings.paths.courses_dir}/{course_name}"
-    submission_dir = (
-        f"{settings.paths.submissions_dir}/{course_name}/{student_name}/{sub_id}"
-    )
-    os.makedirs(f"{submission_dir}/src", exist_ok=True)
-    logging.info(f"Created submission directory: {submission_dir}")
-    with ZipFile(BytesIO(submission.file.read())) as zip_ref:
-        zip_ref.extractall(submission_dir + "/src")
-    logging.info(f"Unziped src/")
+    id = submission_id()
+    sub_dir = create_submission_dir(id, submission, student_name, course_name)
+    score_url = await grade_submission(sub_dir, get_container_url(course_name))
+    score = None
+    with open(score_url, "r") as file:
+        score = file.read()
 
-    # Copy course files to submission directory
-    shutil.copytree(f"{course_dir}/tests", f"{submission_dir}/tests")
-    shutil.copy(f"{course_dir}/Dockerfile", f"{submission_dir}/Dockerfile")
-    shutil.copy(f"{course_dir}/requirements.txt", f"{submission_dir}/requirements.txt")
-    logging.info("Copied course files to submission directory")
 
-    logging.info(f"Start grading")
-    score = await grade_submission(submission_dir)
-
-    # Clean up all temporary files after grading
-    cleanup_student_directory(submission_dir)
-
-    logging.info(f"Grading completed for ID: {sub_id}, Score: {score}")
-
+    logging.info(f"Grading completed for ID: {id}, Score: {score}")
     return JSONResponse(
         {
             "score": score,
         },
         status_code=200,
     )
+
+def create_submission_dir(id, submission, student, course):
+    """
+    Creates a directory e.g.
+    _submissions/
+        Programmieren1/
+            s-nhohnn/
+                id37/
+                    src/
+                        main.py
+    """
+    sub_dir = (f"{settings.paths.submissions_dir}/{course}/{student}/id{id}")
+    base_path = Path(sub_dir).resolve()
+    src_path = base_path / "src"
+    output_path = base_path / "output"
+
+    src_path.mkdir(parents=True, exist_ok=True)
+    output_path.mkdir(parents=True, exist_ok=True)
+
+    with ZipFile(BytesIO(submission.file.read())) as zip_ref:
+        zip_ref.extractall(src_path)
+    logging.info("Unziped submission")
+
+    return sub_dir

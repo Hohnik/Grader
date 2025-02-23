@@ -1,4 +1,4 @@
-from src.main import *
+from src.main import add, multiply
 
 
 def test_add():

@@ -28,5 +28,4 @@ This table stores information about courses.
 |----------------|--------------|-----------------|
 | `id`           | INTEGER      | PRIMARY KEY, AUTOINCREMENT |
 | `coursename`   | TEXT         | UNIQUE, NOT NULL |
-| `dockerfile`   | TEXT         | NOT NULL |
-| `tests`        | TEXT         | NOT NULL |
+| `containerUrl` | TEXT         | NOT NULL |

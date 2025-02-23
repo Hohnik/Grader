@@ -13,6 +13,9 @@ CREATE TABLE IF NOT EXISTS students (
 CREATE TABLE IF NOT EXISTS courses (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     coursename TEXT UNIQUE NOT NULL,
-    dockerfile TEXT NOT NULL,
-    tests TEXT NOT NULL
+    containerUrl TEXT NOT NULL
 );
+
+INSERT OR IGNORE INTO courses (
+    id, coursename, containerUrl
+) VALUES (0, "example_course", "hohniki/teacher_test")
