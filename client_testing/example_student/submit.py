@@ -1,3 +1,10 @@
+# /// script
+# dependencies = [
+#   "pyyaml",
+#   "requests",
+# ]
+# ///
+
 import os
 import shutil
 import sys

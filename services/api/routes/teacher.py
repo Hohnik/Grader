@@ -3,17 +3,23 @@ import os
 import zipfile
 
 from fastapi import APIRouter, File, Form, UploadFile
-from pydantic import BaseModel
 
 from config import settings
 
-
-class upload(BaseModel):
-    username: str
-    submission: str
-
-
 router = APIRouter()
+
+# TODO:
+# Remove dockerfile, tests, requirements
+# Remove directory creation
+# Example_submission has to be uploaded
+# Container_url has to be provided
+# Add course to database
+# Server has to run the process once to test
+# Remove from database if not working
+# -- Extras
+# Set default value for start date
+# Validate user with password and username
+# Check if user wants to override existing courses
 
 
 @router.post("/teacher/upload/")
