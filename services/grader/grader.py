@@ -87,23 +87,32 @@ async def spawn_container(sub_dir: str, container_url: str) -> str:
         if stderr_text:
             logging.warning(f"Container stderr: {stderr_text}")
 
-        if command.returncode != 0:
-            error_msg = stderr_text or stdout_text or "Unknown error (empty output)"
-            logging.error(f"Container execution failed with code {command.returncode}: {error_msg}")
+        # Log the return code but don't treat it as an error
+        logging.info(f"Container exited with code {command.returncode}")
+        
+        # Only consider it a container execution error if the score file isn't created
+        score_file_path = output_path / "score.txt"
+        if not score_file_path.exists():
+            error_msg = stderr_text or stdout_text or "No error output but score file wasn't created"
+            logging.error(f"Container execution failed: {error_msg}")
             raise RuntimeError(f"Container execution failed: {error_msg}")
-        else:
-            logging.info("Container executed successfully.")
+            
+        logging.info("Container executed and score file was created successfully.")
     except asyncio.CancelledError:
         raise
     except Exception as e:
         logging.exception("Exception while running container")
         raise RuntimeError(f"Failed to run container: {str(e)}")
         
-    # Check if the score file was created
+    # Check that the score file exists and has content
     if not score_file_path.exists():
         logging.error("Container did not generate a score.txt file")
         raise FileNotFoundError(f"Expected score file not found at {score_file_path}")
-        
+    
+    # Optionally check for empty score file
+    if score_file_path.stat().st_size == 0:
+        logging.warning("Score file was created but is empty")
+    
     logging.info(f"Score file created at {score_file_path}")
     return str(score_file_path)
 
