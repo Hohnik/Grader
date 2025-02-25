@@ -12,11 +12,17 @@ async def spawn_container(sub_dir: str, container_url: str) -> str:
      - student code will be mounted to sub_dir/src/
      - the Docker container writes the score output to sub_dir/output/score.txt.
     """
+    assert Path(f"{sub_dir}/src").exists()
+    assert Path(f"{sub_dir}/output").exists()
     logging.info("Spawning Docker container with prebuilt image.")
+
 
     base_path = Path(sub_dir).resolve()
     src_path = base_path / "src"
     output_path = base_path / "output"
+    logging.info(base_path)
+    logging.info(src_path)
+    logging.info(output_path)
 
     # Construct Docker run command with absolute paths.
     # Note: Use quotes to properly escape any spaces in the path.
@@ -35,7 +41,8 @@ async def spawn_container(sub_dir: str, container_url: str) -> str:
     if command.returncode != 0:
         error_msg = stderr.decode().strip() or stdout.decode().strip()
         logging.error(f"Container execution failed: {error_msg}")
-        raise RuntimeError(f"Error running docker container: {error_msg}")
+
+        raise RuntimeError("No valid container url")
     else:
         logging.info("Container executed successfully.")
 

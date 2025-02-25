@@ -7,7 +7,7 @@ from fastapi import APIRouter, File, Form, UploadFile
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 
-from api.db_handler import get_container_url, submission_id
+from api.db_handler import get_container_by_course_name, get_submission_id
 from api.grader_handler import grade_submission
 from config import settings
 
@@ -33,9 +33,9 @@ async def submit(
 
     # TODO: validate if course exists (also student_name?)
 
-    id = submission_id()
+    id = get_submission_id()
     sub_dir = create_submission_dir(id, submission, student_name, course_name)
-    score_url = await grade_submission(sub_dir, get_container_url(course_name))
+    score_url = await grade_submission(sub_dir, get_container_by_course_name(course_name))
     score = None
     with open(score_url, "r") as file:
         score = file.read()

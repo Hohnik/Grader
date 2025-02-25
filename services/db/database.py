@@ -4,7 +4,7 @@ import sqlite3
 db_path = os.path.join(os.path.dirname(__file__), "grader.db")
 
 
-def create_database():
+def initialize_database():
     create_file_url = os.path.join(os.path.dirname(__file__), "grader_create.sql")
 
     conn = sqlite3.connect(db_path)
@@ -18,7 +18,7 @@ def create_database():
     conn.close()
 
 
-def fetch_container(course_name):
+def get_container(course_name):
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
 
@@ -28,5 +28,20 @@ def fetch_container(course_name):
     return res.fetchone()[0]
 
 
+def upsert_course(course_name, container_name):
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
+    sql = """
+        INSERT INTO course (coursename, containerUrl)
+        VALUES (?, ?)
+        ON CONFLICT(course_name) DO UPDATE 
+        SET containerUrl = excluded.containerUrl
+    """
+    cursor.executescript(sql, (course_name, container_name))
+    conn.commit()
+    conn.close()
+
+
+
 if __name__ == "__main__":
-    create_database()
+    initialize_database()

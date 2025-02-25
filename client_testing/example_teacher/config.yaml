@@ -1,6 +1,8 @@
-username: Osendorfer
+username: Hohnik
 password: 123
 
-course_name: Programmieren
+course_name: example_course
+container_name: hohniki/teacher_test
+
 start_date: 02.12.2024
 end_date: 30.12.2024

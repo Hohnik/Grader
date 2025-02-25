@@ -2,7 +2,7 @@ import logging
 
 from fastapi import FastAPI, HTTPException, Request
 
-from api.db_handler import initialize_db
+from api.db_handler import init_db
 from api.routes import student_router, teacher_router
 
 logging.basicConfig(
@@ -17,7 +17,7 @@ logging.basicConfig(
 app = FastAPI()
 app.include_router(student_router)
 app.include_router(teacher_router)
-initialize_db()
+init_db()
 
 
 @app.middleware("http")

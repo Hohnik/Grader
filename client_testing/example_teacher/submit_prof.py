@@ -11,19 +11,18 @@ def main():
 
 
 def submit_project(config):
-    tests = shutil.make_archive("tests", "zip", "tests")
+    src = shutil.make_archive("src", "zip", "src")
 
     url = "http://0.0.0.0:8000/teacher/upload/"  # TODO: Relace with real url
 
     files = {
-        "tests": open(tests, "rb"),
-        "dockerfile": open("Dockerfile", "rb"),
-        "requirements": open("requirements.txt", "rb"),
+        "example_submission": open(src, "rb"),
     }
     data = {
         "username": config["username"],
         "password": config["password"],
         "course_name": config["course_name"],
+        "container_name": config["container_name"],
         "start_date": config["start_date"],
         "end_date": config["end_date"],
     }
@@ -38,7 +37,7 @@ def submit_project(config):
             \nMessage: {response.text}"
         )
 
-    os.remove(tests)
+    os.remove(src)
 
 
 def read_config():

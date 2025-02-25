@@ -1,25 +1,27 @@
 import logging
 import os
+import tempfile
 import zipfile
+from pathlib import Path
 
 from fastapi import APIRouter, File, Form, UploadFile
 
+from api.db_handler import upsert_course_by_course_name
+from api.grader_handler import grade_submission
 from config import settings
 
 router = APIRouter()
 
 # TODO:
-# Remove dockerfile, tests, requirements
-# Remove directory creation
-# Example_submission has to be uploaded
-# Container_url has to be provided
-# Add course to database
-# Server has to run the process once to test
-# Remove from database if not working
+# [x] Example_submission has to be uploaded
+# [x] Container_url has to be provided
+# [x] Add course to database
+# [x] Server has to run the process once to test
+# [x] Remove from database if not working --> cant check this
 # -- Extras
-# Set default value for start date
-# Validate user with password and username
-# Check if user wants to override existing courses
+# [ ] Set default value for start date
+# [ ] Validate user with password and username
+# [ ] Check if user wants to override existing courses
 
 
 @router.post("/teacher/upload/")
@@ -27,27 +29,44 @@ async def teacher_upload(
     username: str = Form(None),
     password: str = Form(None),
     course_name: str = Form(None),
+    container_name: str = Form(None),
+    example_submission: UploadFile = File(None),
     start_date: str = Form(None),
     end_date: str = Form(None),
-    tests: UploadFile = File(None),
-    dockerfile: UploadFile = File(None),
-    requirements: UploadFile = File(None),
 ):
-    logging.info(
-        f"Teacher upload received - Course: {course_name}, Teacher: {username}"
-    )
-    logging.debug(f"Course details - Start: {start_date}, End: {end_date}")
+    logging.info("Create/Update Course")
+    score = None
+    with tempfile.TemporaryDirectory() as tempdir:
+        tmp_path = Path(tempdir)
+        zip_path= tmp_path / "src.zip/"
+        src_path = tmp_path / "src"
+        output_path = tmp_path / "output"
+        src_path.mkdir(parents=True, exist_ok=True)
+        output_path.mkdir(parents=True, exist_ok=True)
 
-    course_dir = f"{settings.paths.courses_dir}/{course_name}"
 
-    unzipped = zipfile.ZipFile(tests.file, "r")
-    os.makedirs(f"{course_dir}/tests", exist_ok=True)
-    unzipped.extractall(f"{course_dir}/tests/")
+        with open(zip_path, "wb") as file:
+            content = await example_submission.read()
+            file.write(content)
 
-    with open(f"{course_dir}/dockerfile", "wb") as f:
-        f.write(dockerfile.file.read())
-    with open(f"{course_dir}/requirements.txt", "wb") as f:
-        f.write(requirements.file.read())
+
+        with zipfile.ZipFile(zip_path) as zip:
+            zip.extractall(src_path)
+            os.remove(zip_path)
+
+        logging.error(os.listdir(tempdir))
+        logging.error(container_name)
+
+
+        score_url = await grade_submission(tempdir, container_name)
+        with open(score_url, "r") as file:
+            score = file.read()
+
+
+    if not score:
+        return "Score is empty. Please update your tests."
+
+    upsert_course_by_course_name(course_name, container_name)
+    return score
 
     logging.info(f"Course files uploaded successfully - Course: {course_name}")
-    logging.info("")
