@@ -32,12 +32,12 @@ def upsert_course(course_name, container_name):
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
     sql = """
-        INSERT INTO course (coursename, containerUrl)
+        INSERT INTO courses (coursename, containerUrl)
         VALUES (?, ?)
-        ON CONFLICT(course_name) DO UPDATE 
+        ON CONFLICT(coursename) DO UPDATE 
         SET containerUrl = excluded.containerUrl
     """
-    cursor.executescript(sql, (course_name, container_name))
+    cursor.execute(sql, (course_name, container_name))
     conn.commit()
     conn.close()
 

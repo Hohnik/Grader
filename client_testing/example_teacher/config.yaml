@@ -2,7 +2,7 @@ username: Hohnik
 password: 123
 
 course_name: example_course
-container_name: hohniki/teacher_test
+container_name: hohniki/teacher_test:latest
 
 start_date: 02.12.2024
 end_date: 30.12.2024

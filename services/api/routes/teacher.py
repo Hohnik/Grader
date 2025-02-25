@@ -36,9 +36,9 @@ async def teacher_upload(
 ):
     logging.info("Create/Update Course")
     score = None
-    with tempfile.TemporaryDirectory() as tempdir:
+    with tempfile.TemporaryDirectory(dir=Path("tmp/").resolve()) as tempdir:
         tmp_path = Path(tempdir)
-        zip_path= tmp_path / "src.zip/"
+        zip_path= tmp_path / "src.zip"
         src_path = tmp_path / "src"
         output_path = tmp_path / "output"
         src_path.mkdir(parents=True, exist_ok=True)
@@ -53,9 +53,6 @@ async def teacher_upload(
         with zipfile.ZipFile(zip_path) as zip:
             zip.extractall(src_path)
             os.remove(zip_path)
-
-        logging.error(os.listdir(tempdir))
-        logging.error(container_name)
 
 
         score_url = await grade_submission(tempdir, container_name)
