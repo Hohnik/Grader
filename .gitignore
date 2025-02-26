@@ -1,6 +1,7 @@
 _submissions/
 _courses/
 *.db
+.ruff_cache/
 
 
 
