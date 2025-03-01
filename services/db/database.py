@@ -42,6 +42,20 @@ def upsert_course(course_name, container_name):
     conn.close()
 
 
+def fetch_students():
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
+
+    res = cursor.execute("SELECT * FROM students")
+    return res.fetchall()
+
+
+def fetch_courses():
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
+
+    res = cursor.execute("SELECT id, coursename, containerUrl FROM courses")
+    return res.fetchall()
 
 if __name__ == "__main__":
     initialize_database()

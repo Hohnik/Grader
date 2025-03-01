@@ -1,4 +1,5 @@
-from db.database import get_container, initialize_database, upsert_course
+from db.database import (fetch_courses, fetch_students, get_container,
+                         initialize_database, upsert_course)
 from db.database_utils import create_submission
 
 
@@ -16,3 +17,8 @@ def get_container_by_course_name(course_name):
 def upsert_course_by_course_name(course_name, container_name):
     return upsert_course(course_name, container_name)
 
+def fetch_all_students():
+    return fetch_students()
+
+def fetch_all_courses():
+    return fetch_courses()

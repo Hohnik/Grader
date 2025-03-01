@@ -35,7 +35,9 @@ async def submit(
 
     id = get_submission_id()
     sub_dir = create_submission_dir(id, submission, student_name, course_name)
-    score_url = await grade_submission(sub_dir, get_container_by_course_name(course_name))
+    score_url = await grade_submission(
+        sub_dir, get_container_by_course_name(course_name)
+    )
     score = None
     with open(score_url, "r") as file:
         score = file.read()
