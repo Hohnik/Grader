@@ -57,8 +57,9 @@ def fetch_courses():
     res = cursor.execute("SELECT id, coursename, containerUrl FROM courses")
     return res.fetchall()
 
-def delete_course(id:int):
-    try: 
+
+def delete_course(id: int):
+    try:
         conn = sqlite3.connect(db_path)
         cursor = conn.cursor()
         sql = """
@@ -74,7 +75,7 @@ def delete_course(id:int):
     finally:
         conn.close()
 
-    return rows_deleted > 0 
+    return rows_deleted > 0
 
 
 if __name__ == "__main__":

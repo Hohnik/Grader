@@ -10,6 +10,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+
 def test_docker_running():
     client = docker.from_env()
     assert client.ping(), "Docker is not running!"
@@ -26,6 +27,7 @@ def test_create_image():
     finally:
         if img:
             client.images.remove(img.id)
+
 
 def test_upload_image():
     client = docker.from_env()
@@ -49,7 +51,7 @@ def test_submit():
             tmpdir = Path(tmpdir)
 
             src_dir_path = create_src_directory(tmpdir)
-            zip_path = shutil.make_archive(src_dir_path,"zip",src_dir_path)
+            zip_path = shutil.make_archive(src_dir_path, "zip", src_dir_path)
             image = create_image(tmpdir)
             repo_url = upload_image(image)
 
@@ -60,7 +62,7 @@ def test_submit():
                 "course_name": "test_course",
                 "container_name": repo_url,
                 "start_date": datetime.now(),
-                "end_date": datetime.now() + timedelta(minutes=10)
+                "end_date": datetime.now() + timedelta(minutes=10),
             }
             files = {"example_submission": open(zip_path, "rb")}
             response = requests.post(url, data, files=files)
@@ -71,7 +73,9 @@ def test_submit():
         if image:
             client.images.remove(image.id)
 
+
 # ----------------------------------------------------
+
 
 def create_src_directory(directory: Path):
     src_dir = directory / "src"
@@ -98,9 +102,11 @@ def create_python_file(directory: Path):
     assert file_path.name in os.listdir(directory)
     return file_path.resolve()
 
+
 # ----------------------------------------------------
 
-def create_image(tmpdir:Path):
+
+def create_image(tmpdir: Path):
     python_file_path = create_python_file(tmpdir)
     test_file_path = create_test_file(tmpdir, python_file_path)
     dockerfile_path = create_dockerfile(tmpdir, test_file_path)
@@ -108,13 +114,13 @@ def create_image(tmpdir:Path):
     return img
 
 
-def build_image(directory:Path, dockerfile_path: Path):
+def build_image(directory: Path, dockerfile_path: Path):
     client = docker.from_env()
     image, logs = client.images.build(
         path=str(directory),
         dockerfile=dockerfile_path.name,
-        tag = f"{os.getenv("DOCKERHUB_USERNAME")}/test_repository:latest",
-        rm=True
+        tag=f"{os.getenv("DOCKERHUB_USERNAME")}/test_repository:latest",
+        rm=True,
     )
     return image
 
@@ -124,18 +130,14 @@ def upload_image(image):
     client.login(
         username=os.getenv("DOCKERHUB_USERNAME"),
         password=os.getenv("DOCKERHUB_PASSWORD"),
-        registry="https://index.docker.io/v1/"
+        registry="https://index.docker.io/v1/",
     )
     print(image.tags)
 
     repository = image.tags[0].split(":")[0]
     tag = image.tags[0].split(":")[1]
-    client.images.push(
-        repository=repository,
-        tag=tag
-    )
+    client.images.push(repository=repository, tag=tag)
     return repository + ":" + tag
-
 
 
 def create_dockerfile(directory: Path, test_file_path: Path):

@@ -11,7 +11,6 @@ class PathSettings(BaseSettings):
 
 class Settings(BaseSettings):
     def setup(self):
-
         return self
 
     api_host: str = "0.0.0.0"

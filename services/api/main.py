@@ -25,7 +25,6 @@ app.include_router(home_router)
 init_db()
 
 
-
 @app.middleware("http")
 async def limit_upload_size(request: Request, call_next):
     content_length = request.headers.get("Content-Length")
