@@ -8,7 +8,6 @@ from fastapi import APIRouter, File, Form, UploadFile
 
 from api.db_handler import upsert_course_by_course_name
 from api.grader_handler import grade_submission
-from config import settings
 
 router = APIRouter()
 

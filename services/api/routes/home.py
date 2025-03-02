@@ -40,14 +40,17 @@ async def get_courses():
                 <td>{coursename}</td>
                 <td><a href="https://hub.docker.com/repository/docker/{containerUrl.split(':')[0]}/general" target="_blank">{containerUrl}</a></td>
                 <td style="color: #F00; text-align: center">
-                <span hx-delete="/courses/delete/{id}">X</span>
+                <button class="btn-delete" 
+                    hx-delete="/courses/delete/{id}" 
+                    hx-target="closest tr" 
+                    hx-swap="outerHTML">X</button>
                 </td>
             </tr>
             """
             for id, coursename, containerUrl in fetched_courses
         )
         return f"""
-        <table hx-target="closest tr" hx-swap="outerHTML">
+        <table >
             <tr><th>ID</th><th>Name</th><th>Repository</th><th>Delete</th></tr>
             {courses_html}
         </table>
@@ -59,6 +62,6 @@ async def get_courses():
 async def delete_course(id: int):
     res = delete_course_by_id(id)
     if res:
-        return Response(status_code=204)
+        return Response(status_code=200, content="")
     else:
         return JSONResponse({"error": "Course not fount"}, status_code=404)

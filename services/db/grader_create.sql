@@ -15,7 +15,3 @@ CREATE TABLE IF NOT EXISTS courses (
     coursename TEXT UNIQUE NOT NULL,
     containerUrl TEXT NOT NULL
 );
-
-INSERT OR IGNORE INTO courses (
-    id, coursename, containerUrl
-) VALUES (0, "example_course", "hohniki/teacher_test")
