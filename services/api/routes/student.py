@@ -5,17 +5,10 @@ from zipfile import ZipFile
 
 from fastapi import APIRouter, File, Form, UploadFile
 from fastapi.responses import JSONResponse
-from pydantic import BaseModel
 
 from api.db_handler import get_container_by_course_name, get_submission_id
 from api.grader_handler import grade_submission
 from config import settings
-
-
-class submission(BaseModel):
-    username: str
-    submission: str
-
 
 router = APIRouter()
 

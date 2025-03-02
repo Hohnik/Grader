@@ -1,9 +1,10 @@
 import logging
 
 from fastapi import FastAPI, HTTPException, Request
+from fastapi.staticfiles import StaticFiles
 
 from api.db_handler import init_db
-from api.routes import root_router, student_router, teacher_router
+from api.routes import home_router, student_router, teacher_router
 
 logging.basicConfig(
     level=logging.INFO,
@@ -15,10 +16,14 @@ logging.basicConfig(
 
 
 app = FastAPI()
+app.mount("/static", StaticFiles(directory="static"), name="static")
+
+
 app.include_router(student_router)
 app.include_router(teacher_router)
-app.include_router(root_router)
+app.include_router(home_router)
 init_db()
+
 
 
 @app.middleware("http")

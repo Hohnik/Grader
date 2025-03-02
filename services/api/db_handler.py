@@ -1,5 +1,5 @@
-from db.database import (fetch_courses, fetch_students, get_container,
-                         initialize_database, upsert_course)
+from db.database import (delete_course, fetch_courses, fetch_students,
+                         get_container, initialize_database, upsert_course)
 from db.database_utils import create_submission
 
 
@@ -22,3 +22,6 @@ def fetch_all_students():
 
 def fetch_all_courses():
     return fetch_courses()
+
+def delete_course_by_id(id):
+    return delete_course(id)

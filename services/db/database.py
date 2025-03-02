@@ -57,5 +57,25 @@ def fetch_courses():
     res = cursor.execute("SELECT id, coursename, containerUrl FROM courses")
     return res.fetchall()
 
+def delete_course(id:int):
+    try: 
+        conn = sqlite3.connect(db_path)
+        cursor = conn.cursor()
+        sql = """
+            DELETE FROM courses
+            WHERE id = ?
+        """
+        cursor.execute(sql, (id,))
+        conn.commit()
+        rows_deleted = cursor.rowcount
+    except sqlite3.Error as e:
+        print("SQLite error:", e)
+        rows_deleted = 0
+    finally:
+        conn.close()
+
+    return rows_deleted > 0 
+
+
 if __name__ == "__main__":
     initialize_database()

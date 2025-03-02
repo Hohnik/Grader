@@ -1,13 +1,9 @@
-from fastapi import APIRouter
-from fastapi.responses import HTMLResponse
-
-from api.db_handler import fetch_all_courses, fetch_all_students
-
-from .tags import a, div, h1, h2, html, li, table, tbody, td, th, tr, ul
-
-router = APIRouter()
-
-styles = """
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Students and Courses</title>
     <style>
         /* General Reset */
         * {
@@ -116,70 +112,38 @@ styles = """
             .container {
                 padding: 15px;
             }
-            
-            th, td {
+            th,
+            td {
                 padding: 8px 10px;
             }
-            
             h1 {
                 font-size: 24px;
             }
-            
             h2 {
                 font-size: 20px;
             }
         }
     </style>
-    """
+    <script src="/static/htmx.mini.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>Students and Courses</h1>
 
-@router.get("/", response_class=HTMLResponse)
-def root():
-    fetched_students = fetch_all_students()
-    fetched_courses = fetch_all_courses()
-    print(fetched_courses)
-    print(fetched_students)
+        <h2>Students</h2>
+        <div id="students" hx-get="/students" hx-trigger="load">
+            <ul>
+                <li>No students found</li>
+            </ul>
+        </div>
 
-    if fetched_students:
-        students = table(
-            tr(th("ID"), th("Username")),
-            "".join(
-                tr(td(str(id)), td(username))
-                for (id, username) in fetched_students
-            )
-        )
-    else:
-        students = ul(li("No students found"))
-
-    if fetched_courses:
-        courses = table(
-            tr(
-                th("ID"),
-                th("Name"),
-                th("Repository")
-            ),
-            "".join(
-                tr(
-                    td(str(id)),
-                    td(coursename),
-    td(a(f"{containerUrl}", href=f"https://hub.docker.com/repository/docker/{containerUrl.split(':')[0]}/general", target="_blank"))
-                )
-                for (id, coursename, containerUrl) in fetched_courses
-                )
-        )
-    else:
-        courses = ul(li("No courses available"))
-
-    return html(
-        div(
-            h1("Students and Courses"),
-            h2("Students"),
-            students,
-            h2("Courses"),
-            courses,
-            classes=["container"],
-        ),
-        head_content="",
-        styles=styles
-    )
-
+        <h2>Courses</h2>
+        <div id="courses" hx-get="/courses" hx-trigger="load">
+            <ul>
+                <li>No courses available</li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>
 
