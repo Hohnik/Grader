@@ -6,20 +6,14 @@ from pathlib import Path
 
 from fastapi import APIRouter, File, Form, UploadFile
 
-from api.db_handler import upsert_course_by_course_name
+from api.db_handler import upsert_course_by_name
 from api.grader_handler import grade_submission
 
 router = APIRouter()
 
 # TODO:
-# [x] Example_submission has to be uploaded
-# [x] Container_url has to be provided
-# [x] Add course to database
-# [x] Server has to run the process once to test
-# [x] Remove from database if not working --> cant check this
-# -- Extras
-# [ ] Set default value for start date
 # [ ] Validate user with password and username
+# [ ] Set default value for start date
 # [ ] Check if user wants to override existing courses
 
 
@@ -58,7 +52,7 @@ async def teacher_upload(
     if not score:
         return "Score is empty. Please update your tests."
 
-    upsert_course_by_course_name(course_name, container_name)
+    upsert_course_by_name(course_name, container_name)
     return score
 
     logging.info(f"Course files uploaded successfully - Course: {course_name}")

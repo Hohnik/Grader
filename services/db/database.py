@@ -1,10 +1,11 @@
 import os
 import sqlite3
+from datetime import datetime
 
 db_path = os.path.join(os.path.dirname(__file__), "grader.db")
 
 
-def initialize_database():
+def _initialize_database():
     create_file_url = os.path.join(os.path.dirname(__file__), "grader_create.sql")
 
     conn = sqlite3.connect(db_path)
@@ -17,8 +18,35 @@ def initialize_database():
     conn.commit()
     conn.close()
 
+def _create_submission():
+    """ Returns the id of the created submission """
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
+    cursor.execute("BEGIN TRANSACTION;")
+    try:
+        cursor.execute("INSERT INTO submissions DEFAULT VALUES;")
+        new_id = cursor.lastrowid
+        conn.commit()
+        return new_id
 
-def get_container(course_name):
+    except Exception as e:
+        conn.rollback()
+        print(f"An error occurred: {e}")
+
+def _update_submission(score):
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
+    sql = """
+        UPDATE submissions 
+        SET score=?, timestamp=?
+    """
+    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    cursor.execute(sql, (score, timestamp))
+    conn.commit()
+    conn.close()
+
+
+def _get_container_by_name(course_name):
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
 
@@ -28,7 +56,7 @@ def get_container(course_name):
     return res.fetchone()[0]
 
 
-def upsert_course(course_name, container_name):
+def _upsert_course_by_name(course_name, container_name):
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
     sql = """
@@ -42,7 +70,7 @@ def upsert_course(course_name, container_name):
     conn.close()
 
 
-def fetch_students():
+def _fetch_students():
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
 
@@ -50,7 +78,7 @@ def fetch_students():
     return res.fetchall()
 
 
-def fetch_courses():
+def _fetch_courses():
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
 
@@ -58,7 +86,30 @@ def fetch_courses():
     return res.fetchall()
 
 
-def delete_course(id: int):
+def _get_student_by_name(student_name):
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
+
+    res = cursor.execute("""
+        SELECT id, username
+        FROM students 
+        WHERE username=?
+    """, (student_name,))
+    return res.fetchone()
+
+
+def _get_student_by_name(course_name):
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
+
+    res = cursor.execute("""
+        SELECT id, coursename, containerUrl 
+        FROM courses 
+        WHERE coursename=?
+    """, (course_name,))
+    return res.fetchone()
+
+def _delete_course_by_id(id: int):
     try:
         conn = sqlite3.connect(db_path)
         cursor = conn.cursor()
@@ -79,4 +130,4 @@ def delete_course(id: int):
 
 
 if __name__ == "__main__":
-    initialize_database()
+    _initialize_database()

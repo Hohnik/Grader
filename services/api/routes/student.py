@@ -6,7 +6,8 @@ from zipfile import ZipFile
 from fastapi import APIRouter, File, Form, UploadFile
 from fastapi.responses import JSONResponse
 
-from api.db_handler import get_container_by_course_name, get_submission_id
+from api.db_handler import (create_submission, get_container_by_name,
+                            get_course_by_name, update_submission)
 from api.grader_handler import grade_submission
 from config import settings
 
@@ -24,16 +25,25 @@ async def submit(
         f"Submission received - Course: {course_name}, Student: {student_name}"
     )
 
-    # TODO: validate if course exists (also student_name?)
+    if not get_course_by_name(course_name):
+        return JSONResponse(
+            content={"detail": f"Course {course_name} not found."},
+            status_code=200,
+        )
 
-    id = get_submission_id()
+    # TODO: validate if student exists
+
+
+    id = create_submission()
     sub_dir = create_submission_dir(id, submission, student_name, course_name)
     score_url = await grade_submission(
-        sub_dir, get_container_by_course_name(course_name)
+        sub_dir, get_container_by_name(course_name)
     )
     score = None
     with open(score_url, "r") as file:
         score = file.read()
+
+    update_submission(score)
 
     logging.info(f"Grading completed for ID: {id}, Score: {score}")
     return JSONResponse(

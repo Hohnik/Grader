@@ -42,7 +42,7 @@ def test_upload_image():
             client.images.remove(img.id)
 
 
-def test_submit():
+def test_teacher_submit():
     client = docker.from_env()
     image = None
 
@@ -57,7 +57,7 @@ def test_submit():
 
             url = "http://localhost:8000/teacher/upload"
             data = {
-                "username": "test_user",
+                "username": "test_teacher",
                 "password": "test_password",
                 "course_name": "test_course",
                 "container_name": repo_url,
@@ -73,6 +73,23 @@ def test_submit():
         if image:
             client.images.remove(image.id)
 
+def test_student_submit_with_course_existing():
+    test_teacher_submit() # Make sure the course exists
+
+    with tempfile.TemporaryDirectory() as tmpdir:
+        tmpdir = Path(tmpdir)
+        src_path = create_src_directory(tmpdir)
+        src_zip_path = shutil.make_archive(src_path, "zip", src_path)
+
+        url = "http://localhost:8000/student/submit"
+        data = {
+            "student_name": "test_student",
+            "course_name": "test_course",
+        }
+        files = {"submission": open(src_zip_path, "rb")}
+        response = requests.post(url, data, files=files)
+
+        assert response.status_code == 200
 
 # ----------------------------------------------------
 

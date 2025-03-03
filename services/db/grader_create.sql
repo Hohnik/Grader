@@ -1,6 +1,8 @@
--- Create the `assignments` table
+-- Create the `submissions` table
 CREATE TABLE IF NOT EXISTS submissions (
-    id INTEGER PRIMARY KEY AUTOINCREMENT
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    score TEXT NOT NULL,
+    timestamp DATETIME,
 );
 
 -- Create the `students` table
