@@ -153,6 +153,11 @@
         <h1>Students and Courses</h1>
 
         <h2>Students</h2>
+        <form hx-post="/students/add" hx-target="#students">
+            <label for="username">Add Student</label>
+            <input id="username" type="text" name="username">
+            <input type="submit" value="Add">
+        </form>
         <div id="students" hx-get="/students" hx-trigger="load">
             <ul>
                 <li>No students found</li>

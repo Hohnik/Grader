@@ -6,8 +6,8 @@ from zipfile import ZipFile
 from fastapi import APIRouter, File, Form, UploadFile
 from fastapi.responses import JSONResponse
 
-from api.db_handler import (create_submission, get_container_by_name,
-                            get_course_by_name, update_submission)
+from api.db_handler import (create_submission, get_course_by_name,
+                            update_submission)
 from api.grader_handler import grade_submission
 from config import settings
 
@@ -36,8 +36,9 @@ async def submit(
 
     id = create_submission()
     sub_dir = create_submission_dir(id, submission, student_name, course_name)
+    container_url = get_course_by_name(course_name)[2]
     score_url = await grade_submission(
-        sub_dir, get_container_by_name(course_name)
+        sub_dir, container_url
     )
     score = None
     with open(score_url, "r") as file:

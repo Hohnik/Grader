@@ -1,8 +1,10 @@
-from fastapi import APIRouter, Request, Response
+from fastapi import APIRouter, Form, Request, Response
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
 
-from api.db_handler import delete_course_by_id, fetch_courses, fetch_students
+from api.db_handler import (add_student_by_name, delete_course_by_id,
+                            delete_student_by_id, fetch_courses,
+                            fetch_students)
 
 router = APIRouter()
 templates = Jinja2Templates(directory="templates")
@@ -18,17 +20,64 @@ async def get_students():
     fetched_students = fetch_students()
     if fetched_students:
         students_html = "".join(
-            f"<tr><td>{id}</td><td>{username}</td></tr>"
+            f"""
+            <tr>
+                <td>{id}</td>
+                <td>{username}</td>
+                <td style="color: #F00; text-align: center">
+                    <button class="btn-delete" 
+                        hx-delete="/students/delete/{id}" 
+                        hx-target="closest tr" 
+                        hx-swap="outerHTML">X</button>
+                </td>
+            </tr>
+            """
             for id, username in fetched_students
         )
         return f"""
         <table>
-            <tr><th>ID</th><th>Username</th></tr>
+            <tr><th>ID</th><th>Username</th><th style="text-align: center;">Delete</th></tr>
             {students_html}
         </table>
         """
     else:
         return "<ul><li>No students found</li></ul>"
+
+
+@router.post("/students/add", response_class=HTMLResponse)
+def add_student(username:str= Form(None)):
+    add_student_by_name(username)
+    fetched_students = fetch_students()
+    fetched_students = fetch_students()
+    students_html = "".join(
+        f"""
+        <tr>
+            <td>{id}</td>
+            <td>{username}</td>
+            <td style="color: #F00; text-align: center">
+                <button class="btn-delete" 
+                    hx-delete="/students/delete/{id}" 
+                    hx-target="closest tr" 
+                    hx-swap="outerHTML">X</button>
+            </td>
+        </tr>
+        """
+        for id, username in fetched_students
+    )
+    return f"""
+    <table>
+        <tr><th>ID</th><th>Username</th><th style="text-align: center;">Delete</th></tr>
+        {students_html}
+    </table> 
+    """
+
+@router.delete("/students/delete/{id}")
+async def delete_student(id: int):
+    res = delete_student_by_id(id)
+    if res:
+        return Response(status_code=200, content="")
+    else:
+        return JSONResponse({"error": "Student not fount"}, status_code=404)
 
 
 @router.get("/courses", response_class=HTMLResponse)
@@ -53,7 +102,7 @@ async def get_courses():
         )
         return f"""
         <table >
-            <tr><th>ID</th><th>Name</th><th>Repository</th><th>Delete</th></tr>
+            <tr><th>ID</th><th>Name</th><th>Repository</th><th style="text-align: center;">Delete</th></tr>
             {courses_html}
         </table>
         """

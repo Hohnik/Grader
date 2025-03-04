@@ -70,6 +70,52 @@ def _upsert_course_by_name(course_name, container_name):
     conn.close()
 
 
+def _add_student_by_name(name):
+    try:
+        conn = sqlite3.connect(db_path)
+        cursor = conn.cursor()
+        sql = """
+            INSERT INTO students(username)
+            VALUES (?)
+        """
+        cursor.execute(sql, (name,))
+        conn.commit()
+    except sqlite3.Error as e:
+        print("SQLite error:", e)
+    finally:
+        conn.close()
+
+def _get_student_by_name(username):
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
+
+    res = cursor.execute("""
+        SELECT id, username
+        FROM students 
+        WHERE username=?
+    """, (username,))
+    return res.fetchone()
+
+def _delete_student_by_id(id: int):
+    try:
+        conn = sqlite3.connect(db_path)
+        cursor = conn.cursor()
+        sql = """
+            DELETE FROM students
+            WHERE id = ?
+        """
+        cursor.execute(sql, (id,))
+        conn.commit()
+        rows_deleted = cursor.rowcount
+    except sqlite3.Error as e:
+        print("SQLite error:", e)
+        rows_deleted = 0
+    finally:
+        conn.close()
+
+    return rows_deleted > 0
+
+
 def _fetch_students():
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
@@ -78,27 +124,8 @@ def _fetch_students():
     return res.fetchall()
 
 
-def _fetch_courses():
-    conn = sqlite3.connect(db_path)
-    cursor = conn.cursor()
 
-    res = cursor.execute("SELECT id, coursename, containerUrl FROM courses")
-    return res.fetchall()
-
-
-def _get_student_by_name(student_name):
-    conn = sqlite3.connect(db_path)
-    cursor = conn.cursor()
-
-    res = cursor.execute("""
-        SELECT id, username
-        FROM students 
-        WHERE username=?
-    """, (student_name,))
-    return res.fetchone()
-
-
-def _get_student_by_name(course_name):
+def _get_course_by_name(course_name):
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
 
@@ -128,6 +155,12 @@ def _delete_course_by_id(id: int):
 
     return rows_deleted > 0
 
+def _fetch_courses():
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
+
+    res = cursor.execute("SELECT id, coursename, containerUrl FROM courses")
+    return res.fetchall()
 
 if __name__ == "__main__":
     _initialize_database()
