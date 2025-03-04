@@ -27,43 +27,40 @@ source .venv/bin/activate  # On Windows: .venv\Scripts\activate
 ```bash
 pip install uv
 cd service
-uv pip install .
+uv sync
 ```
 
 4. Start the grading service:
 ```bash
-uvicorn grader:app --host 0.0.0.0 --port 8000
+uvicorn api.main:app --host 0.0.0.0 --port 8000
 ```
 
 ### Configuration
 - Ensure Docker is installed and running
-- The service stores submissions in `service/submissions/<course>/<student>/<submission_id>/`
-- Course files are stored in `service/courses/<course_name>/`
+- The service stores submissions in `service/_submissions/<course>/<student>/<submission_id>/`
 - Logs are written to `service/grader.log`
 
 ## For Teachers
-
 ### Creating a New Course
 
-1. Edit the `config.yaml` in your course directory:
-```yaml
-course_name: "Programmieren"
-server_url: "http://localhost:8000"
+1. Create a container and upload it to dockerhub. 
+    - It has to contain a `/app/src/` and `/app/output/` directory. These will get mounted to the server.
+    - The students code is mounted to `/app/src/` and the score needs to be written to `/app/output/score.txt`
+```python
+# TODO: Example here
 ```
 
-2. Prepare your test files in the `tests/` directory. Tests can be weighted using `@pytest.mark.weight(n)`.
 
-Example test file:
-```python
-from src.main import *
+2. Edit the `config.yaml` in your course directory:
+```yaml
+username: example_username
+password: example_password
 
-@pytest.mark.weight(2)  # This test is worth 2 points
-def test_add():
-    assert add(1, 2) == 3
-    assert add(-1, 1) == 0
+course_name: example_course
+container_name: example_user/example_repo:latest # TODO: Check if it is possible to make this a full URL
 
-def test_basic():  # Default weight is 1 point
-    assert multiply(2, 3) == 6
+start_date: 02.12.2024
+end_date: 30.12.2024
 ```
 
 3. Run the upload script:
@@ -94,11 +91,5 @@ def multiply(a: int, b: int) -> int:
 
 3. Submit your solution:
 ```bash
-python submit.py
+python submit_stud.py
 ```
-
-### Scoring
-- Each test has a weight (default: 1)
-- Final score is calculated as: (passed_weight / total_weight) * 100
-- Detailed test output is provided in the response
-- All submission attempts are preserved in `submissions/<course>/<student>/<id>/`
