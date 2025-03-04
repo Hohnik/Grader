@@ -2,7 +2,7 @@
 CREATE TABLE IF NOT EXISTS submissions (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     score TEXT NOT NULL,
-    timestamp DATETIME,
+    timestamp DATETIME
 );
 
 -- Create the `students` table
