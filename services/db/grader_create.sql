@@ -1,7 +1,7 @@
 -- Create the `submissions` table
 CREATE TABLE IF NOT EXISTS submissions (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    score TEXT NOT NULL,
+    score TEXT,
     timestamp DATETIME
 );
 

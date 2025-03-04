@@ -5,7 +5,7 @@ A containerized grading system for Python(for now) assignments that provides aut
 ## For Server Administrators
 
 ### System Requirements
-- Python 3.11+
+- Python 3.12+
 - Docker Desktop (for macOS/Windows) or Docker Engine (for Linux)
 - uv (for dependency management)
 
