@@ -6,8 +6,8 @@ from pathlib import Path
 
 from fastapi import APIRouter, File, Form, UploadFile
 
-from api.db_handler import upsert_course_by_name
-from api.grader_handler import grade_submission
+from .db_handler import upsert_course_by_name
+from .grader_handler import grade_submission
 
 router = APIRouter()
 
@@ -29,7 +29,7 @@ async def teacher_upload(
 ):
     logging.info("Create/Update Course")
     score = None
-    with tempfile.TemporaryDirectory(dir=Path("tmp/").resolve()) as tempdir:
+    with tempfile.TemporaryDirectory(dir=Path(f"{os.path.dirname(__file__)}/_tmp/").resolve()) as tempdir:
         tmp_path = Path(tempdir)
         zip_path = tmp_path / "src.zip"
         src_path = tmp_path / "src"

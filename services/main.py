@@ -3,8 +3,8 @@ import logging
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.staticfiles import StaticFiles
 
+from api import home_router, student_router, teacher_router
 from api.db_handler import init_db
-from api.routes import home_router, student_router, teacher_router
 
 logging.basicConfig(
     level=logging.INFO,

@@ -6,10 +6,11 @@ from zipfile import ZipFile
 from fastapi import APIRouter, File, Form, UploadFile
 from fastapi.responses import JSONResponse
 
-from api.db_handler import (create_submission, get_course_by_name,
-                            update_submission)
-from api.grader_handler import grade_submission
 from config import settings
+
+from .db_handler import (create_submission, get_course_by_name,
+                         update_submission)
+from .grader_handler import grade_submission
 
 router = APIRouter()
 

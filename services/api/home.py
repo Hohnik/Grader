@@ -2,9 +2,8 @@ from fastapi import APIRouter, Form, Request, Response
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
 
-from api.db_handler import (add_student_by_name, delete_course_by_id,
-                            delete_student_by_id, fetch_courses,
-                            fetch_students)
+from .db_handler import (add_student_by_name, delete_course_by_id,
+                         delete_student_by_id, fetch_courses, fetch_students)
 
 router = APIRouter()
 templates = Jinja2Templates(directory="templates")
