@@ -7,6 +7,7 @@ from fastapi import APIRouter, File, Form, UploadFile
 from fastapi.responses import JSONResponse
 
 from config import settings
+from mail import send_mail_to
 
 from .db_handler import (create_submission, get_course_by_name,
                          update_submission)
@@ -27,8 +28,9 @@ async def submit(
     )
 
     if not get_course_by_name(course_name):
+        logging.info(f"Course '{course_name}' not found")
         return JSONResponse(
-            content={"detail": f"Course {course_name} not found."},
+            content={"message": f"Course '{course_name}' not found."},
             status_code=200,
         )
 
@@ -47,10 +49,15 @@ async def submit(
 
     update_submission(score)
 
+    email = f"{student_name}@haw-landshut.de"
+    subject = f"Submission {id} score"
+    message = "This is a example message" # TODO: Make up what message should be added
+    send_mail_to(email, subject, message)
+
     logging.info(f"Grading completed for ID: {id}, Score: {score}")
     return JSONResponse(
         {
-            "score": score,
+            "message": score,
         },
         status_code=200,
     )

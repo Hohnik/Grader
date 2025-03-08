@@ -28,7 +28,6 @@ def submit_assignment(config, src_dir: Path = Path("src")):
 
     zip_path = Path("submission.zip")
     try:
-        print("Zipping your code...")
         shutil.make_archive("submission", "zip", src_dir)
 
         # Submit assignment
@@ -44,12 +43,12 @@ def submit_assignment(config, src_dir: Path = Path("src")):
 
             if response.status_code == 200:
                 result = response.json()
-                print(
-                    f"\nSubmission successful! 🎉\nScore: {result.get('score', 'N/A')}"
-                )
+                print( f"{result.get('message', 'N/A')}")
             else:
                 print(f"Submission failed with {response.status_code}: {response.text}")
                 sys.exit(1)
+    except Exception as e:
+        print(f"An error occured: {e}")
     finally:
         if zip_path.exists():
             zip_path.unlink()
