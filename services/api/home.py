@@ -2,8 +2,13 @@ from fastapi import APIRouter, Form, Request, Response
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
 
-from .db_handler import (add_student_by_name, delete_course_by_id,
-                         delete_student_by_id, fetch_courses, fetch_students)
+from .db_handler import (
+    add_student_by_name,
+    delete_course_by_id,
+    delete_student_by_id,
+    fetch_courses,
+    fetch_students,
+)
 
 router = APIRouter()
 templates = Jinja2Templates(directory="templates")
@@ -44,7 +49,7 @@ async def get_students():
 
 
 @router.post("/students/add", response_class=HTMLResponse)
-def add_student(username:str= Form(None)):
+def add_student(username: str = Form(None)):
     add_student_by_name(username)
     fetched_students = fetch_students()
     fetched_students = fetch_students()
@@ -69,6 +74,7 @@ def add_student(username:str= Form(None)):
         {students_html}
     </table> 
     """
+
 
 @router.delete("/students/delete/{id}")
 async def delete_student(id: int):

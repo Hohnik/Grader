@@ -29,7 +29,9 @@ async def teacher_upload(
 ):
     logging.info("Create/Update Course")
     score = None
-    with tempfile.TemporaryDirectory(dir=Path(f"{os.path.dirname(__file__)}/_tmp/").resolve()) as tempdir:
+    with tempfile.TemporaryDirectory(
+        dir=Path(f"{os.path.dirname(__file__)}/_tmp/").resolve()
+    ) as tempdir:
         tmp_path = Path(tempdir)
         zip_path = tmp_path / "src.zip"
         src_path = tmp_path / "src"

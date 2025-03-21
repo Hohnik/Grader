@@ -73,8 +73,9 @@ def test_teacher_submit():
         if image:
             client.images.remove(image.id)
 
+
 def test_student_submit_with_course_existing():
-    test_teacher_submit() # Make sure the course exists
+    test_teacher_submit()  # Make sure the course exists
 
     with tempfile.TemporaryDirectory() as tmpdir:
         tmpdir = Path(tmpdir)
@@ -90,6 +91,7 @@ def test_student_submit_with_course_existing():
         response = requests.post(url, data, files=files)
 
         assert response.status_code == 200
+
 
 # ----------------------------------------------------
 

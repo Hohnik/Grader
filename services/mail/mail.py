@@ -21,4 +21,3 @@ def send_mail_to(receiver_email, subject, message):
         print("Email sent successfully!")
     except Exception as e:
         print(f"Failed to send email: {e}")
-

@@ -9,8 +9,7 @@ from fastapi.responses import JSONResponse
 from config import settings
 from mail import send_mail_to
 
-from .db_handler import (create_submission, get_course_by_name,
-                         update_submission)
+from .db_handler import create_submission, get_course_by_name, update_submission
 from .grader_handler import grade_submission
 
 router = APIRouter()
@@ -36,13 +35,10 @@ async def submit(
 
     # TODO: validate if student exists
 
-
     id = create_submission()
     sub_dir = create_submission_dir(id, submission, student_name, course_name)
     container_url = get_course_by_name(course_name)[2]
-    score_url = await grade_submission(
-        sub_dir, container_url
-    )
+    score_url = await grade_submission(sub_dir, container_url)
     score = None
     with open(score_url, "r") as file:
         score = file.read()
@@ -51,7 +47,7 @@ async def submit(
 
     email = f"{student_name}@haw-landshut.de"
     subject = f"Submission {id} score"
-    message = "This is a example message" # TODO: Make up what message should be added
+    message = "This is a example message"  # TODO: Make up what message should be added
     send_mail_to(email, subject, message)
 
     logging.info(f"Grading completed for ID: {id}, Score: {score}")

@@ -18,8 +18,9 @@ def _initialize_database():
     conn.commit()
     conn.close()
 
+
 def _create_submission():
-    """ Returns the id of the created submission """
+    """Returns the id of the created submission"""
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
     cursor.execute("BEGIN TRANSACTION;")
@@ -32,6 +33,7 @@ def _create_submission():
     except Exception as e:
         conn.rollback()
         print(f"An error occurred: {e}")
+
 
 def _update_submission(score):
     conn = sqlite3.connect(db_path)
@@ -85,16 +87,21 @@ def _add_student_by_name(name):
     finally:
         conn.close()
 
+
 def _get_student_by_name(username):
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
 
-    res = cursor.execute("""
+    res = cursor.execute(
+        """
         SELECT id, username
         FROM students 
         WHERE username=?
-    """, (username,))
+    """,
+        (username,),
+    )
     return res.fetchone()
+
 
 def _delete_student_by_id(id: int):
     try:
@@ -124,17 +131,20 @@ def _fetch_students():
     return res.fetchall()
 
 
-
 def _get_course_by_name(course_name):
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
 
-    res = cursor.execute("""
+    res = cursor.execute(
+        """
         SELECT id, coursename, containerUrl 
         FROM courses 
         WHERE coursename=?
-    """, (course_name,))
+    """,
+        (course_name,),
+    )
     return res.fetchone()
+
 
 def _delete_course_by_id(id: int):
     try:
@@ -155,12 +165,14 @@ def _delete_course_by_id(id: int):
 
     return rows_deleted > 0
 
+
 def _fetch_courses():
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
 
     res = cursor.execute("SELECT id, coursename, containerUrl FROM courses")
     return res.fetchall()
+
 
 if __name__ == "__main__":
     _initialize_database()

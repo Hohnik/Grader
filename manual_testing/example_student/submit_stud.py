@@ -43,7 +43,7 @@ def submit_assignment(config, src_dir: Path = Path("src")):
 
             if response.status_code == 200:
                 result = response.json()
-                print( f"{result.get('message', 'N/A')}")
+                print(f"{result.get('message', 'N/A')}")
             else:
                 print(f"Submission failed with {response.status_code}: {response.text}")
                 sys.exit(1)
